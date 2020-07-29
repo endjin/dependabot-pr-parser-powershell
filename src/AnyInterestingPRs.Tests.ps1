@@ -17,7 +17,7 @@ Describe 'AnyInterestingPRs Tests' -Tag Unit {
             $res | Should -Be $false
         }
 
-        It 'should return false when matching patterns are specified with a SemVer upgrade more than MaxSemVerIncrement' {
+        It 'should return false when matching patterns are specified with a SemVer increment more than MaxSemVerIncrement' {
             $res = AnyInterestingPRs -Titles @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 1.0.0 in /Solutions/dependency-playground') `
                                                     -MaxSemVerIncrement 'minor' `
                                                     -PackageWildcardExpressions @('Corvus.*')
@@ -25,18 +25,116 @@ Describe 'AnyInterestingPRs Tests' -Tag Unit {
             $res | Should -Be $false
         }
 
-        It 'should return true when matching patterns are specified with a SemVer upgrade less than MaxSemVerIncrement' {
-            $res = AnyInterestingPRs -Titles @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground') `
+        It 'should return false when matching patterns are specified but no PR matches the pattern' {
+            $res = AnyInterestingPRs -Titles @('Bump Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground') `
                                                     -MaxSemVerIncrement 'minor' `
                                                     -PackageWildcardExpressions @('Corvus.*')
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $false
+        }
+
+        It 'should return true when matching patterns are specified with a SemVer increment less than MaxSemVerIncrement (<maxSemVerIncrement>)' -TestCases @(
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'major'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground'); maxSemVerIncrement = 'minor'; packageWildcardExpressions = @('Corvus.*'); }
+        ) {
+            param (
+                [string[]] $titles,
+                [string] $maxSemVerIncrement,
+                [string[]] $packageWildcardExpressions
+            )
+
+            $res = AnyInterestingPRs `
+                    -Titles $titles `
+                    -MaxSemVerIncrement $maxSemVerIncrement `
+                    -PackageWildcardExpressions $packageWildcardExpressions
             $res | Should -BeOfType [boolean]
             $res | Should -Be $true
         }
 
-        It 'should return true when matching patterns are specified with a SemVer upgrade equal to MaxSemVerIncrement' {
-            $res = AnyInterestingPRs -Titles @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground') `
+        It 'should return true when matching patterns are specified with a SemVer increment equal to MaxSemVerIncrement (<maxSemVerIncrement>)' -TestCases @(
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 1.0.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'major'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'minor'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground'); maxSemVerIncrement = 'patch'; packageWildcardExpressions = @('Corvus.*'); }
+        ) {
+            param (
+                [string[]] $titles,
+                [string] $maxSemVerIncrement,
+                [string[]] $packageWildcardExpressions
+            )
+
+            $res = AnyInterestingPRs `
+                    -Titles $titles `
+                    -MaxSemVerIncrement $maxSemVerIncrement `
+                    -PackageWildcardExpressions $packageWildcardExpressions
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $true
+        }
+    }
+
+    Context 'Multiple PRs' {
+        It 'should return false when no patterns are specified' {
+            $res = AnyInterestingPRs -Titles @(
+                'Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground',
+                'Bump Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground') `
+                                                    -MaxSemVerIncrement 'minor' `
+                                                    -PackageWildcardExpressions @()
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $false
+        }
+
+        It 'should return false when matching patterns are specified with a SemVer increment more than MaxSemVerIncrement' {
+            $res = AnyInterestingPRs -Titles  @(
+                'Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 1.0.0 in /Solutions/dependency-playground',
+                'Bump Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground') `
                                                     -MaxSemVerIncrement 'minor' `
                                                     -PackageWildcardExpressions @('Corvus.*')
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $false
+        }
+
+        It 'should return false when matching patterns are specified but no PR matches the pattern' {
+            $res = AnyInterestingPRs -Titles @(
+                'Bump Foo.Bar from 0.9.0 to 0.9.1 in /Solutions/dependency-playground',
+                'Bump Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground') `
+                                                    -MaxSemVerIncrement 'minor' `
+                                                    -PackageWildcardExpressions @('Corvus.*')
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $false
+        }
+
+        It 'should return true when matching patterns are specified with a SemVer increment less than MaxSemVerIncrement (<maxSemVerIncrement>)' -TestCases @(
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground', 'Bump Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'major'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground', 'Bump Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'minor'; packageWildcardExpressions = @('Corvus.*'); }
+        ) {
+            param (
+                [string[]] $titles,
+                [string] $maxSemVerIncrement,
+                [string[]] $packageWildcardExpressions
+            )
+
+            $res = AnyInterestingPRs `
+                    -Titles $titles `
+                    -MaxSemVerIncrement $maxSemVerIncrement `
+                    -PackageWildcardExpressions $packageWildcardExpressions
+            $res | Should -BeOfType [boolean]
+            $res | Should -Be $true
+        }
+
+        It 'should return true when matching patterns are specified with a SemVer increment equal to MaxSemVerIncrement (<maxSemVerIncrement>)' -TestCases @(
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 1.0.0 in /Solutions/dependency-playground', 'Bump Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'major'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground', 'Bump Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'minor'; packageWildcardExpressions = @('Corvus.*'); }
+            @{ titles = @('Bump Corvus.Extensions.Newtonsoft.Json from 0.9.0 to 0.9.1 in /Solutions/dependency-playground', 'Bump Newtonsoft.Json from 0.9.0 to 0.10.0 in /Solutions/dependency-playground'); maxSemVerIncrement = 'patch'; packageWildcardExpressions = @('Corvus.*'); }
+        ) {
+            param (
+                [string[]] $titles,
+                [string] $maxSemVerIncrement,
+                [string[]] $packageWildcardExpressions
+            )
+
+            $res = AnyInterestingPRs `
+                    -Titles $titles `
+                    -MaxSemVerIncrement $maxSemVerIncrement `
+                    -PackageWildcardExpressions $packageWildcardExpressions
             $res | Should -BeOfType [boolean]
             $res | Should -Be $true
         }
