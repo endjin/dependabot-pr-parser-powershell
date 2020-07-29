@@ -7,6 +7,7 @@ try {
         Install-Module Pester -RequiredVersion $pesterVer -Force -Scope CurrentUser
     }
     Import-Module Pester
+    Remove-Module dependabot-pr-parser -ErrorAction SilentlyContinue
     $results = Invoke-Pester $here/src -PassThru
 
     if ($results.FailedCount -gt 0) {
