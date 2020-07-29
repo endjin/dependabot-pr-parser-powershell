@@ -23,23 +23,29 @@ function AnyInterestingPRs
         minor = 1
         major = 2
     }
-    $maxUpdateTypeAsEnum = [semver_upgrade_type]$MaxSemVerIncrement
+    $maxSemVerIncrementAsEnum = [semver_upgrade_type]$MaxSemVerIncrement
 
     $result = $false
     foreach ($prTitle in $Titles) {
+        Write-Verbose ('Checking PR: {0}' -f $prTitle)
+        
         # parse the PR title
         $packageName,$fromVersion,$toVersion,$folder = ParsePrTitle -Title $prTitle
+        Write-Verbose ('`tPackage: {0}' -f $packageName)
 
         # apply package filter
         $matchFound = IsPackageInteresting -PackageName $packageName -PackageWildcardExpressions $PackageWildcardExpressions
+        Write-Verbose ('`tMatch Found?: {0}' -f $matchFound)
 
         # derive upgrade type
         [semver_upgrade_type]$upgradeType = GetSemVerIncrement -FromVersion $fromVersion -ToVersion $toVersion
 
-        if ($matchFound -and ($upgradeType -le $maxUpdateTypeAsEnum)) {
+        if ($matchFound -and ($upgradeType -le $maxSemVerIncrementAsEnum)) {
+            Write-Verbose '`tSetting result to true'
             $result = $true
         }
     }
 
+    Write-Verbose ('Result: {0}' -f $result)
     return $result
 }

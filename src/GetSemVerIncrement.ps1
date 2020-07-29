@@ -26,5 +26,6 @@ function GetSemVerIncrement
         $upgradeType = 'minor'
     }
 
+    Write-Verbose ('SemVerIncrement: {0}' -f $upgradeType)
     $upgradeType
 }

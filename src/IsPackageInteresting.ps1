@@ -16,7 +16,7 @@ function IsPackageInteresting
     foreach ($f in $PackageWildcardExpressions) {
         if ($PackageName -ilike $f) {
             $matchFound = $true
-            Write-Verbose ("Dependency '{0}' matched with parrern '{1}'" -f $PackageName, $PackageWildcardExpressions)
+            Write-Verbose ("Dependency '{0}' matched with pattern '{1}'" -f $PackageName, $PackageWildcardExpressions)
             break;
         }
     }
