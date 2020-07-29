@@ -1,4 +1,4 @@
-function GetUpgradeType
+function GetSemVerIncrement
 {
     [CmdletBinding()]
     param (

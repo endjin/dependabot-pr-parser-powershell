@@ -7,16 +7,16 @@ function IsPackageInteresting
         $PackageName,
 
         [string[]]
-        $PackageNamePatterns = @()
+        $PackageWildcardExpressions = @()
     )
 
     $ErrorActionPreference = 'Stop'
 
     $matchFound = $false
-    foreach ($f in $PackageNamePatterns) {
+    foreach ($f in $PackageWildcardExpressions) {
         if ($PackageName -ilike $f) {
             $matchFound = $true
-            Write-Verbose ("Dependency '{0}' matched with parrern '{1}'" -f $PackageName, $PackageNamePatterns)
+            Write-Verbose ("Dependency '{0}' matched with parrern '{1}'" -f $PackageName, $PackageWildcardExpressions)
             break;
         }
     }
