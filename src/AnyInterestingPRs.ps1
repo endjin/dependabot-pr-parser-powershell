@@ -31,17 +31,17 @@ function AnyInterestingPRs
         
         # parse the PR title
         $packageName,$fromVersion,$toVersion,$folder = ParsePrTitle -Title $prTitle
-        Write-Verbose ('`tPackage: {0}' -f $packageName)
+        Write-Verbose ('Package: {0}' -f $packageName)
 
         # apply package filter
         $matchFound = IsPackageInteresting -PackageName $packageName -PackageWildcardExpressions $PackageWildcardExpressions
-        Write-Verbose ('`tMatch Found?: {0}' -f $matchFound)
+        Write-Verbose ('Match Found?: {0}' -f $matchFound)
 
         # derive upgrade type
         [semver_upgrade_type]$upgradeType = GetSemVerIncrement -FromVersion $fromVersion -ToVersion $toVersion
 
         if ($matchFound -and ($upgradeType -le $maxSemVerIncrementAsEnum)) {
-            Write-Verbose '`tSetting result to true'
+            Write-Verbose 'Setting result to true'
             $result = $true
         }
     }
