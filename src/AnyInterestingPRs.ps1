@@ -3,6 +3,8 @@ function AnyInterestingPRs
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
+        [AllowNull()]
+        [AllowEmptyCollection()]
         [string[]]
         $Titles,
 
