@@ -5,7 +5,7 @@
 #
 
 # find all the functions that make-up this module
-$functions = Get-ChildItem $PSScriptRoot -Recurse -Include *.ps1 | `
+$functions = Get-ChildItem $PSScriptRoot/functions -Recurse -Include *.ps1 | `
 								Where-Object { $_ -notmatch ".Tests.ps1" }
 					
 # dot source the individual scripts that make-up this module
